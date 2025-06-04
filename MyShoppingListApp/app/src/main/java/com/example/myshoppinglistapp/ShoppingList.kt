@@ -68,12 +68,36 @@ fun ShoppingListApp(){
         }
 
         LazyColumn(
+            //indefinite amount of columns, but render only that are required
             modifier = Modifier
                 .fillMaxSize()
                 .padding(16.dp)
         ) {
             items(sItems){
-                ShoppingListItem(it, {}, {})
+                /*ShoppingListItem(it, {}, {})*/
+
+                item ->
+                if(item.isEditing){
+                    ShoppingItemEditor(item = item, onEditComplete = {
+                        editedName, editedQuantity ->
+                        sItems = sItems.map { it.copy(isEditing = false) }
+                        val editedItem = sItems.find { it.id == item.id }
+
+                        editedItem?.let {
+                            it.name = editedName
+                            it.quantity = editedQuantity
+                        }
+                    })
+
+                }else{
+                    ShoppingListItem(item = item, onEditClick = {
+                        sItems = sItems.map{ it.copy(
+                            isEditing = it.id == item.id //will return true or false (to find out on which item we have clicked on
+                        )}
+                    }, onDeleteClick = {
+                        sItems = sItems-item
+                    })
+                }
             }
         }
     }
@@ -82,7 +106,9 @@ fun ShoppingListApp(){
             onDismissRequest = { showDialog = false },
             confirmButton = {
                 Row(
-                    modifier = Modifier.fillMaxWidth().padding(8.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Button(onClick = {
@@ -131,7 +157,9 @@ fun ShoppingListApp(){
                             itemName = it
                         },
                         singleLine = true,
-                        modifier = Modifier.fillMaxWidth().padding(8.dp)
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp)
                     )
 
                     OutlinedTextField(
@@ -140,7 +168,9 @@ fun ShoppingListApp(){
                             itemQuantity = it
                         },
                         singleLine = true,
-                        modifier = Modifier.fillMaxWidth().padding(8.dp)
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp)
                     )
 
 
@@ -159,7 +189,10 @@ fun ShoppingItemEditor(item: ShoppingItem, onEditComplete: (String, Int) -> Unit
     var isEditing by remember { mutableStateOf(item.isEditing) } //check default value of isEditing
 
     Row(
-        modifier = Modifier.fillMaxWidth().background(Color.White).padding(8.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(Color.White)
+            .padding(8.dp),
         horizontalArrangement = Arrangement.SpaceEvenly,
     ){
         Column {
@@ -167,7 +200,9 @@ fun ShoppingItemEditor(item: ShoppingItem, onEditComplete: (String, Int) -> Unit
                 value = editedName,
                 onValueChange = { editedName = it },
                 singleLine = true,
-                modifier = Modifier.wrapContentSize().padding(8.dp)//only take as much as space as the items that are inside it.
+                modifier = Modifier
+                    .wrapContentSize()
+                    .padding(8.dp)//only take as much as space as the items that are inside it.
                 //if the text 5 chars wide this will be only 5 chars wide.
             )
 
@@ -175,7 +210,9 @@ fun ShoppingItemEditor(item: ShoppingItem, onEditComplete: (String, Int) -> Unit
                 value = editedQuantity,
                 onValueChange = { editedQuantity = it },
                 singleLine = true,
-                modifier = Modifier.wrapContentSize().padding(8.dp)//only take as much as space as the items that are inside it.
+                modifier = Modifier
+                    .wrapContentSize()
+                    .padding(8.dp)//only take as much as space as the items that are inside it.
                 //if the text 5 chars wide this will be only 5 chars wide.
             )
         }
@@ -204,10 +241,15 @@ fun ShoppingListItem (
 ){
 
     Row (
-        modifier = Modifier.padding(8.dp).fillMaxWidth().border(
-            border = BorderStroke(2.dp, Color(0XFF018786)),
-            shape = RoundedCornerShape(20)
-        )
+        modifier = Modifier
+            .padding(8.dp)
+            .fillMaxWidth()
+            .border(
+                border = BorderStroke(2.dp, Color(0XFF018786)),
+                shape = RoundedCornerShape(20)
+
+            ),
+        horizontalArrangement = Arrangement.SpaceBetween
     ){
         Text(item.name, modifier = Modifier.padding(8.dp))
         Text("Qty: ${item.quantity}", modifier = Modifier.padding(8.dp))
