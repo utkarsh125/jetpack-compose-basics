@@ -1,5 +1,5 @@
-import android.graphics.Paint.Align
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.aspectRatio
@@ -24,9 +24,11 @@ import com.example.myrecipeapp.Category
 import com.example.myrecipeapp.MainViewModel
 
 @Composable
-fun RecipeScreen(modifier: Modifier = Modifier) {
+fun RecipeScreen(modifier: Modifier = Modifier,
+                 viewState:MainViewModel.RecipeState,
+                 navigateToDetail: (Category) -> Unit) {
     val recipeViewModel: MainViewModel = viewModel()
-    val viewState by recipeViewModel.categoriesState
+
 
     Box(modifier = Modifier.fillMaxSize()){
 
@@ -40,7 +42,7 @@ fun RecipeScreen(modifier: Modifier = Modifier) {
             }
             else -> {
                 //Display categories.
-                CategoryScreen(categories = viewState.list)
+                CategoryScreen(categories = viewState.list, navigateToDetail)
             }
         }
     }
@@ -49,7 +51,7 @@ fun RecipeScreen(modifier: Modifier = Modifier) {
 
 
 @Composable
-fun CategoryScreen(categories: List<Category>){
+fun CategoryScreen(categories: List<Category>, navigateToDetail: (Category) -> Unit){
 
     LazyVerticalGrid(
         GridCells.Fixed(2),
@@ -58,17 +60,22 @@ fun CategoryScreen(categories: List<Category>){
     ) {
         items(categories){
             category ->
-            CategoryItem(category = category)
+            CategoryItem(
+                category = category,
+                navigateToDetail
+            )
         }
     }
 }
 
 //how each item looks like
 @Composable
-fun CategoryItem(category: Category){
+fun CategoryItem(category: Category, navigateToDetail: (Category) -> Unit){
 
     Column(
-        modifier = Modifier.padding(8.dp).fillMaxSize(),
+        modifier = Modifier.padding(8.dp).fillMaxSize().clickable {
+            navigateToDetail(category)
+        },
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 

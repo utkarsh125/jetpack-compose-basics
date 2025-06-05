@@ -22,7 +22,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             MyRecipeAppTheme {
                 Surface {
-                    RecipeScreen()
+                    //RecipeScreen()
                 }
             }
         }
