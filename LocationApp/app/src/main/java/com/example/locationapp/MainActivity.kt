@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -24,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.app.ActivityCompat
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.locationapp.ui.theme.LocationAppTheme
 
 class MainActivity : ComponentActivity() {
@@ -31,9 +33,14 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
+
+            val viewModel: LocationViewModel = viewModel()
             LocationAppTheme {
-                Surface {
-                    MyApp()
+                Surface (
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ){
+                    MyApp(viewModel)
                 }
             }
         }
@@ -41,18 +48,21 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun MyApp() {
+fun MyApp(viewModel: LocationViewModel) {
     val context = LocalContext.current //context of current activity I'm in
-    val locationUtils = LocationUtils(context)
-    LocationDisplay(locationUtils = locationUtils, context = context)
+    val locationUtils = LocationUtils(context, viewModel)
+    LocationDisplay(locationUtils = locationUtils, viewModel = viewModel, context = context)
 
 }
 
 @Composable
 fun LocationDisplay(
     locationUtils: LocationUtils,
+    viewModel: LocationViewModel,
     context: Context
 ){
+
+    val location = viewModel.location.value
 
     val requestPermisionLauncher = rememberLauncherForActivityResult(
         contract =  ActivityResultContracts.RequestMultiplePermissions(),
@@ -62,6 +72,7 @@ fun LocationDisplay(
                 && permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true){
                 //I have ACCESS to location
 
+                locationUtils.requestLocationUpdates(viewModel = viewModel)
 
             }else{
                 //ask for permission
@@ -90,14 +101,25 @@ fun LocationDisplay(
         verticalArrangement = Arrangement.Center
     ){
 
-        Text("Location not available")
+        if(location != null){
+            Text("lat:${location.latitude} long:${location.longitude}")
+        }else{
+            Text("Location not available")
+        }
 
         Button(
             onClick = {
                 if(locationUtils.hasLocationPersmission(context)){
                     //Permission already granted
+                    locationUtils.requestLocationUpdates(viewModel)
                 }else{
                     //Request location permission
+                    requestPermisionLauncher.launch(
+                        arrayOf(
+                            Manifest.permission.ACCESS_FINE_LOCATION,
+                            Manifest.permission.ACCESS_COARSE_LOCATION
+                        )
+                    )
 
                 }
             }
