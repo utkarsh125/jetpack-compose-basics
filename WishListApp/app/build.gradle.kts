@@ -43,6 +43,9 @@ android {
 dependencies {
     val room_version = "2.6.0"
 
+    //material2 deps
+    implementation("androidx.compose.material:material:1.5.0")
+
     // Room dependencies using kapt
     implementation("androidx.room:room-runtime:$room_version")
     implementation("androidx.room:room-ktx:$room_version")
